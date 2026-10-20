@@ -95,11 +95,11 @@ const char index_html[] PROGMEM = R"html(
         };
         
         websocket.onmessage = function(event) {
-            console.log("Message received:", {
-                type: typeof event.data,
-                isArrayBuffer: event.data instanceof ArrayBuffer,
-                size: event.data.byteLength
-            });
+            // console.log("Message received:", {
+            //     type: typeof event.data,
+            //     isArrayBuffer: event.data instanceof ArrayBuffer,
+            //     size: event.data.byteLength
+            // });
 
             if (!(event.data instanceof ArrayBuffer)) {
                 console.warn("Message is not an ArrayBuffer");
