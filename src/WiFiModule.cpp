@@ -58,6 +58,7 @@ void WiFiModule::begin() {
 #ifdef USE_WIFI_NETWORK
     // connecting to an existing WiFi network
     WiFi.begin(WIFI_NETWORK_SSID, WIFI_NETWORK_PASS);
+    WiFi.setSleep(false);  // modem sleep delays incoming TCP ACKs and stalls streaming
 
     while (WiFi.status() != WL_CONNECTED) {
         Serial.println("Connecting to WiFI...");
