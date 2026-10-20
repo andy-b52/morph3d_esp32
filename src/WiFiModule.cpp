@@ -5,16 +5,16 @@
 namespace {
 void OnWiFiEvent(WiFiEvent_t event) {
     switch (event) {
-        case SYSTEM_EVENT_STA_CONNECTED:
+        case ARDUINO_EVENT_WIFI_STA_CONNECTED:
             Serial.println("ESP32 connected to WiFi network");
             break;
-        case SYSTEM_EVENT_AP_START:
+        case ARDUINO_EVENT_WIFI_AP_START:
             Serial.println("ESP32 soft AP started");
             break;
-        case SYSTEM_EVENT_AP_STACONNECTED:
+        case ARDUINO_EVENT_WIFI_AP_STACONNECTED:
             Serial.println("Station connected to ESP32 soft AP");
             break;
-        case SYSTEM_EVENT_AP_STADISCONNECTED:
+        case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED:
             Serial.println("Station disconnected from ESP32 soft AP");
             break;
         default:
