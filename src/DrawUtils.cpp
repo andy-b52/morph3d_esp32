@@ -66,8 +66,8 @@ void fadeOutFrame() {
 
 void makePerspective(float x, float y, float z, float& newX, float& newY) {
 
-    const float d = 200.0 * 4096.0;
-    const float cameraOffset = 100.0 * 4096.0;
+    const float d = 200.0f * 4096.0f;
+    const float cameraOffset = 100.0f * 4096.0f;
 
     float divisor = z + d + cameraOffset;
 
