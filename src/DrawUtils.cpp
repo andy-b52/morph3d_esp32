@@ -1,9 +1,13 @@
 #include "DrawUtils.h"
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include "Models.h"
 
 uint8_t frameBuf[PIXELS];
+
+static int32_t roundToInt(float v) {
+    return static_cast<int32_t>(std::lround(v));
+}
 
 void setPixel(int x, int y, uint8_t c) {
     if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
@@ -59,8 +63,7 @@ void fadeOutFrame() {
     }
 }
 
-void makePerspective(float x, float y, float z,
-                     float& newX, float& newY) {
+void makePerspective(float x, float y, float z, float& newX, float& newY) {
 
     const float d = 200.0 * 4096.0;
     const float cameraOffset = 100.0 * 4096.0;
@@ -88,7 +91,7 @@ void rotateModel(uint32_t frameNumber, const Model& m, Model& rotatedModel) {
 
     float newX, newY;
 
-    for (const Point3D& pt : m){
+    for (const Point3D& pt : m) {
         float x0 = pt.x;  // * (1.0f / 4096.0f);
         float y0 = pt.y;  // * (1.0f / 4096.0f);
         float z0 = pt.z;  // * (1.0f / 4096.0f);
@@ -110,9 +113,8 @@ void rotateModel(uint32_t frameNumber, const Model& m, Model& rotatedModel) {
 
         makePerspective(x3, y3, z3, newX, newY);
 
-        rotatedModel.emplace_back(Point3D{static_cast<int32_t>(newX + 0.5f),
-                                          static_cast<int32_t>(newY + 0.5f),
-                                          static_cast<int32_t>(z3 + 0.5f)});
+        rotatedModel.emplace_back(
+            Point3D{roundToInt(newX), roundToInt(newY), roundToInt(z3)});
     }
 }
 
@@ -130,8 +132,7 @@ void morphModels(const Model& srcModel, const Model& dstModel, float stage,
         resModel.clear();
     }
 
-    float s = std::min(stage, 1.0f);
-    s = std::max(s, 0.0f);
+    float s = std::clamp(stage, 0.0f, 1.0f);
 
     for (int i = 0; i < POINTS_PER_MODEL; i++) {
         float srcX = static_cast<float>(srcModel[i].x);
@@ -142,10 +143,9 @@ void morphModels(const Model& srcModel, const Model& dstModel, float stage,
         float dstY = static_cast<float>(dstModel[i].y);
         float dstZ = static_cast<float>(dstModel[i].z);
 
-        resModel.emplace_back(
-            Point3D{static_cast<int32_t>(srcX + s * (dstX - srcX) + 0.5f),
-                    static_cast<int32_t>(srcY + s * (dstY - srcY) + 0.5f),
-                    static_cast<int32_t>(srcZ + s * (dstZ - srcZ) + 0.5f)});
+        resModel.emplace_back(Point3D{roundToInt(srcX + s * (dstX - srcX)),
+                                      roundToInt(srcY + s * (dstY - srcY)),
+                                      roundToInt(srcZ + s * (dstZ - srcZ))});
     }
 }
 
@@ -206,7 +206,7 @@ void drawFrame(uint32_t frameNumber) {
 
     if (!inMorph && noMorphFrameCnt == NO_MORPH_STEP_CNT) {
         inMorph = true;
-        noMorphFrameCnt = 0;        
+        noMorphFrameCnt = 0;
         morphFrameCnt = 0;
         do {
             dstModelIndex = rand() % MODEL_COUNT;
@@ -232,8 +232,10 @@ void drawFrame(uint32_t frameNumber) {
         Model& srcModel = models[srcModelIndex];
         Model& dstModel = models[dstModelIndex];
 
-        morphModels(srcModel, dstModel, (float)(morphFrameCnt % MORPH_STEP_CNT) / (float)MORPH_STEP_CNT,
-                    morphedModel);
+        morphModels(
+            srcModel, dstModel,
+            (float)(morphFrameCnt % MORPH_STEP_CNT) / (float)MORPH_STEP_CNT,
+            morphedModel);
 
         rotateModel(frameNumber, morphedModel, rotatedModel);
 
