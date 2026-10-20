@@ -1,5 +1,5 @@
 #include "DrawUtils.h"
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 #include "Models.h"
 
