@@ -57,11 +57,13 @@ The access point password must be at least 8 characters, or the ESP32 won't star
 
 ### 4. Choose the Wi-Fi mode
 
-In [`src/WiFiModule.h`](src/WiFiModule.h), enable one or both modes:
+In [`platformio.ini`](platformio.ini), enable one or both modes in `build_flags`:
 
-```cpp
-#define USE_SOFT_AP          // ESP32 creates its own network (default)
-// #define USE_WIFI_NETWORK  // ESP32 joins your existing network
+```ini
+build_flags =
+    -std=gnu++17
+    -D USE_SOFT_AP          ; ESP32 creates its own network (default)
+    ; -D USE_WIFI_NETWORK   ; ESP32 joins your existing network
 ```
 
 ### 5. Build and upload
