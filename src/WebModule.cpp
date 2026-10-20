@@ -65,10 +65,18 @@ const char index_html[] PROGMEM = R"html(
     const ctx = canvas.getContext("2d", { alpha: false });
 
     const image = ctx.createImageData(WIDTH, HEIGHT);
-    const data32 = image.data;
+    const rgba = image.data;
+    // Same memory as rgba, one element per pixel (R, G, B, A bytes packed)
+    const pixels = new Uint32Array(rgba.buffer);
+
+    // Grey level -> opaque packed pixel (little-endian: A B G R)
+    const palette = new Uint32Array(256);
+    for (let c = 0; c < 256; c++) {
+        palette[c] = 0xFF000000 | (c << 16) | (c << 8) | c;
+    }
 
     // Automatically match the ESP's current IP address
-    const wsUri = `ws://${window.location.hostname}/ws`;
+    const wsUri = `ws://${window.location.host}/ws`;
     let websocket;
 
     let receivedFrames = 0;
@@ -82,13 +90,13 @@ const char index_html[] PROGMEM = R"html(
         
         websocket.onopen = function(event) {
             console.log('Connection opened');
-            document.getElementById('ws-status').innerHTML = "Connected";
+            document.getElementById('ws-status').textContent = "Connected";
             document.getElementById('ws-status').style.color = "green";
         };
         
         websocket.onclose = function(event) {
             console.log('Connection closed');
-            document.getElementById('ws-status').innerHTML = "Disconnected";
+            document.getElementById('ws-status').textContent = "Disconnected";
             document.getElementById('ws-status').style.color = "red";
             // Attempt to reconnect every 2 seconds
             setTimeout(initWebSocket, 2000); 
@@ -114,55 +122,25 @@ const char index_html[] PROGMEM = R"html(
                 return;
             }
 
-            // if (event.data.byteLength !== FRAME_BYTES) {
-            //     console.warn(
-            //         `Invalid frame size: ${event.data.byteLength}; ` +
-            //         `expected ${FRAME_BYTES} bytes`
-            //     );
-            //     return;
-            // }
+            // Runs of [grey level, run length] byte pairs
+            const runs = new Uint8Array(event.data);
 
-            // Each pixel is four consecutive bytes: R, G, B, A.
-            // image.data.set(new Uint8ClampedArray(event.data));
-
-            // Blazing fast unrolled loop for Uint8ClampedArray
-            // for (let i = 0; i < data32.length; i += 4) {
-            //     data32[i]   = 255; // Red
-            //     data32[i+1] = 0;   // Green (Already 0 by default from createImageData)
-            //     data32[i+2] = 0;   // Blue  (Already 0 by default from createImageData)
-            //     data32[i+3] = 255; // Alpha
-            // }            
-
-            const colorSource = new Uint8Array(event.data);
-
-            let len = 0;
-            for (let i = 0; i < colorSource.length; i += 2) {
-                len += colorSource[i + 1]; // the length byte
+            let pos = 0;
+            for (let i = 0; i < runs.length; i += 2) {
+                const n = runs[i + 1];
+                if (pos + n > FRAME_BYTES) {
+                    console.warn(`Invalid frame: more than ${FRAME_BYTES} pixels`);
+                    return;
+                }
+                pixels.fill(palette[runs[i]], pos, pos + n);
+                pos += n;
             }
-            if (len !== FRAME_BYTES) {
+            if (pos !== FRAME_BYTES) {
                 console.warn(
-                    `Invalid frame size: ${len}; ` +
-                    `expected ${FRAME_BYTES} bytes`
+                    `Invalid frame size: ${pos}; expected ${FRAME_BYTES} pixels`
                 );
                 return;
             }
-
-            let colorIndex = 0;
-            let rgbaIndex = 0;
-
-            // Loop through the pixels and inject the 4th (Alpha) channel
-            while (colorIndex < colorSource.length) {
-                let n = colorSource[colorIndex + 1];
-                for (let i = 0; i < n; i++) {
-                    data32[rgbaIndex + 0] = colorSource[colorIndex]; // R
-                    data32[rgbaIndex + 1] = colorSource[colorIndex]; // G
-                    data32[rgbaIndex + 2] = colorSource[colorIndex]; // B
-                    data32[rgbaIndex + 3] = 255;                     // A (Always fully opaque)
-
-                    rgbaIndex += 4; // Move 4 bytes forward in the target 32-bit canvas array
-                }
-                colorIndex += 2;  // Move 2 bytes forward in the source 8-bit array                    
-            }            
 
             ctx.putImageData(image, 0, 0);
 
