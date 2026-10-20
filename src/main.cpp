@@ -89,7 +89,8 @@ void loop() {
     WebModule::wsCleanupClients();
 
     if (WebModule::wsNumberOfConnectedClients() == 0) {
-        return;  // no connected client...
+        delay(50);  // no clients: nothing to render, check again soon
+        return;
     }
 
     static bool nextFrameDrawn = false;
@@ -110,6 +111,7 @@ void loop() {
 
     if (!WebModule::wsAvailableForWrite()) {
         // Serial.println("WebSocket is not available for write!");
+        delay(1);  // a client's send queue is still draining
         return;
     }
 
