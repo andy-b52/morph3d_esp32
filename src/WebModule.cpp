@@ -136,7 +136,7 @@ const char index_html[] PROGMEM = R"html(
             const colorSource = new Uint8Array(event.data);
 
             let len = 0;
-            for (let i = 0; i < colorSource.length; i += 2){
+            for (let i = 0; i < colorSource.length; i += 2) {
                 len += colorSource[i + 1]; // the length byte
             }
             if (len !== FRAME_BYTES) {
@@ -153,7 +153,7 @@ const char index_html[] PROGMEM = R"html(
             // Loop through the pixels and inject the 4th (Alpha) channel
             while (colorIndex < colorSource.length) {
                 let n = colorSource[colorIndex + 1];
-                for (let i = 0; i < n; i++){
+                for (let i = 0; i < n; i++) {
                     data32[rgbaIndex + 0] = colorSource[colorIndex]; // R
                     data32[rgbaIndex + 1] = colorSource[colorIndex]; // G
                     data32[rgbaIndex + 2] = colorSource[colorIndex]; // B
@@ -192,10 +192,12 @@ const char index_html[] PROGMEM = R"html(
 void onWsEvent(AsyncWebSocket* server, AsyncWebSocketClient* client,
                AwsEventType type, void* arg, uint8_t* data, size_t len) {
     if (type == WS_EVT_CONNECT) {
-        Serial.println("WebSocket client #" + String(client->id()) + " connected from " + client->remoteIP().toString());
+        Serial.println("WebSocket client #" + String(client->id()) +
+                       " connected from " + client->remoteIP().toString());
         // client->text("Hello from ESP32 Server!");
     } else if (type == WS_EVT_DISCONNECT) {
-        Serial.println("WebSocket client #" + String(client->id()) + " disconnected");
+        Serial.println("WebSocket client #" + String(client->id()) +
+                       " disconnected");
     } else if (type == WS_EVT_DATA) {
         AwsFrameInfo* info = (AwsFrameInfo*)arg;
         if (info->final && info->index == 0 && info->len == len) {
@@ -224,10 +226,10 @@ void WebModule::wsCleanupClients() { ws.cleanupClients(); }
 int WebModule::wsNumberOfConnectedClients() { return ws.count(); }
 
 bool WebModule::wsAvailableForWrite() {
-    //return ws.availableForWriteAll();
+    // return ws.availableForWriteAll();
 
-    for (AsyncWebSocketClient& client : ws.getClients()){
-        if (client.status() == WS_CONNECTED && client.queueLen() != 0){
+    for (AsyncWebSocketClient& client : ws.getClients()) {
+        if (client.status() == WS_CONNECTED && client.queueLen() != 0) {
             return false;
         }
     }
@@ -236,8 +238,8 @@ bool WebModule::wsAvailableForWrite() {
 }
 
 void WebModule::wsSendBuf(const void* pBuf, size_t len) {
-    for(AsyncWebSocketClient& client : ws.getClients()){
-        if (client.status() == WS_CONNECTED && client.canSend()){
+    for (AsyncWebSocketClient& client : ws.getClients()) {
+        if (client.status() == WS_CONNECTED && client.canSend()) {
             client.binary(static_cast<const uint8_t*>(pBuf), len);
         }
     }

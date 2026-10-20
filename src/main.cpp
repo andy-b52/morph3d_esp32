@@ -114,7 +114,7 @@ void loop() {
     }
 
     // int LFBS = (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
-    // if (LFBS < FRAME_BYTES){
+    // if (LFBS < FRAME_BYTES) {
     //     Serial.println("No memory to send the frame...");
     //     return;
     // }
