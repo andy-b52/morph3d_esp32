@@ -67,8 +67,8 @@ void makePerspective(float x, float y, float z,
 
     float divisor = z + d + cameraOffset;
 
-    newX = 1.5 * x * d / divisor;
-    newY = 1.5 * y * d / divisor;
+    newX = 1.5f * x * d / divisor;
+    newY = 1.5f * y * d / divisor;
 }
 
 void rotateModel(uint32_t frameNumber, const Model& m, Model& rotatedModel) {
