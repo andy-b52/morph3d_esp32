@@ -236,12 +236,6 @@ bool WebModule::wsAvailableForWrite() {
 }
 
 void WebModule::wsSendBuf(const void* pBuf, size_t len) {
-    /*Serial.printf("WS send: %u bytes, free heap: %u, largest block: %u\n",
-                  (unsigned)len, (unsigned)ESP.getFreeHeap(),
-                  (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));*/
-
-    // ws.binaryAll(static_cast<const uint8_t*>(pBuf), len);
-
     for(AsyncWebSocketClient& client : ws.getClients()){
         if (client.status() == WS_CONNECTED && client.canSend()){
             client.binary(static_cast<const uint8_t*>(pBuf), len);
