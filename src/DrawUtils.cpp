@@ -235,7 +235,7 @@ void drawFrame(uint32_t frameNumber) {
 
         morphModels(
             srcModel, dstModel,
-            (float)(morphFrameCnt % MORPH_STEP_CNT) / (float)MORPH_STEP_CNT,
+            (float)(morphFrameCnt + 1) / (float)MORPH_STEP_CNT,
             morphedModel);
 
         rotateModel(frameNumber, morphedModel, rotatedModel);
