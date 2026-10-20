@@ -2,6 +2,15 @@
 #include <WiFi.h>
 #include "secrets.h"
 
+#ifdef USE_SOFT_AP
+static_assert(sizeof(SOFT_AP_PASS) - 1 >= 8,
+              "SOFT_AP_PASS must be at least 8 characters (WPA2)");
+static_assert(sizeof(SOFT_AP_PASS) - 1 <= 63,
+              "SOFT_AP_PASS must be at most 63 characters (WPA2)");
+static_assert(sizeof(SOFT_AP_SSID) - 1 <= 32,
+              "SOFT_AP_SSID must be at most 32 characters");
+#endif
+
 namespace {
 void OnWiFiEvent(WiFiEvent_t event) {
     switch (event) {
