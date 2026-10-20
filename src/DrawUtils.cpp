@@ -182,7 +182,7 @@ void drawModel(Model& m) {
 
 void drawFrame(uint32_t frameNumber) {
 
-    if (models.size() < 3) {
+    if (models.size() < MODEL_COUNT) {
         return;
     }
 
