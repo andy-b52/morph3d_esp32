@@ -16,8 +16,8 @@ const int NO_MORPH_STEP_CNT = 256;
 // 1 byte per pixel, greyscale palette, 0 - black, 255 - white
 extern uint8_t frameBuf[PIXELS];
 
-extern void setPixel(int x, int y, uint8_t c);
+void setPixel(int x, int y, uint8_t c);
 
-extern void drawFrame(uint32_t frameNumber);
+void drawFrame(uint32_t frameNumber);
 
-extern void encodeFrame(std::vector<uint16_t>& v);
+void encodeFrame(std::vector<uint16_t>& v);

@@ -59,7 +59,7 @@ void fadeOutFrame() {
     }
 }
 
-void makePerspective(const float& x, const float& y, const float& z,
+void makePerspective(float x, float y, float z,
                      float& newX, float& newY) {
 
     const float d = 200.0 * 4096.0;
@@ -71,7 +71,7 @@ void makePerspective(const float& x, const float& y, const float& z,
     newY = 1.5 * y * d / divisor;
 }
 
-void rotateModel(uint32_t frameNumber, Model& m, Model& rotatedModel) {
+void rotateModel(uint32_t frameNumber, const Model& m, Model& rotatedModel) {
     if (!rotatedModel.empty()) {
         rotatedModel.clear();
     }
@@ -86,13 +86,9 @@ void rotateModel(uint32_t frameNumber, Model& m, Model& rotatedModel) {
     float cos2 = cosf(a2), sin2 = sinf(a2);
     float cos3 = cosf(a3), sin3 = sinf(a3);
 
-    size_t n = m.size();
-
     float newX, newY;
 
-    for (int i = 0; i < n; i++) {
-        Point3D& pt = m[i];
-
+    for (const Point3D& pt : m){
         float x0 = pt.x;  // * (1.0f / 4096.0f);
         float y0 = pt.y;  // * (1.0f / 4096.0f);
         float z0 = pt.z;  // * (1.0f / 4096.0f);
@@ -120,7 +116,7 @@ void rotateModel(uint32_t frameNumber, Model& m, Model& rotatedModel) {
     }
 }
 
-void morphModels(Model& srcModel, Model& dstModel, float stage,
+void morphModels(const Model& srcModel, const Model& dstModel, float stage,
                  Model& resModel) {
     if (srcModel.size() != POINTS_PER_MODEL) {
         return;
