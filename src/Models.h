@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 #include <vector>
 
@@ -14,4 +16,4 @@ using Models = std::vector<Model>;
 
 extern Models models;
 
-extern void createModels();
+void createModels();

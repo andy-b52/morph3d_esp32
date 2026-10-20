@@ -1,10 +1,10 @@
-#include <Models.h>
-#include <math.h>
+#include "Models.h"
+#include <cmath>
 
 Models models;
 
 void createModels() {
-    models.reserve(5);
+    models.reserve(MODEL_COUNT);
 
     double totalPoints = static_cast<double>(POINTS_PER_MODEL);
 
@@ -69,7 +69,7 @@ void createModels() {
 
         // We use asymmetric multiplier cycles to smoothly distribute points 
         // around the tube and the main axis without overlapping paths.
-        // 13 and 1 are coprime, meaning the winding path fills out the shape beautifully.
+        // 26 and 1 are coprime, meaning the winding path fills out the shape beautifully.
         double theta = (26.0 * 2.0 * M_PI * idx) / totalPoints; // Winding around the tube
         double phi   = (1.0 * 2.0 * M_PI * idx) / totalPoints;  // Winding around the center ring
 
