@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include "Models.h"
+#include "esp_random.h"
 
 uint8_t frameBuf[PIXELS];
 
@@ -209,7 +210,7 @@ void drawFrame(uint32_t frameNumber) {
         noMorphFrameCnt = 0;
         morphFrameCnt = 0;
         do {
-            dstModelIndex = rand() % MODEL_COUNT;
+            dstModelIndex = esp_random() % MODEL_COUNT;
         } while (dstModelIndex == srcModelIndex);
     } else if (inMorph && morphFrameCnt == MORPH_STEP_CNT) {
         inMorph = false;
@@ -220,7 +221,7 @@ void drawFrame(uint32_t frameNumber) {
 
     if (!inMorph) {
         if (srcModelIndex == -1) {
-            srcModelIndex = rand() % MODEL_COUNT;
+            srcModelIndex = esp_random() % MODEL_COUNT;
         }
 
         Model& srcModel = models[srcModelIndex];
