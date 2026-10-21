@@ -1,6 +1,10 @@
 #include "WebModule.h"
 #include <ESPAsyncWebServer.h>
 
+static_assert(WS_MAX_QUEUED_MESSAGES == 1,
+              "wsAvailableForWrite() relies on a one-message queue; "
+              "set -D WS_MAX_QUEUED_MESSAGES=1 in platformio.ini build_flags");
+
 namespace {
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
@@ -204,21 +208,12 @@ void WebModule::wsCleanupClients() { ws.cleanupClients(); }
 int WebModule::wsNumberOfConnectedClients() { return ws.count(); }
 
 bool WebModule::wsAvailableForWrite() {
-    // return ws.availableForWriteAll();
-
-    for (AsyncWebSocketClient& client : ws.getClients()) {
-        if (client.status() == WS_CONNECTED && client.queueLen() != 0) {
-            return false;
-        }
-    }
-
-    return true;
+    // Locked inside the library. With a one-message queue, "not full"
+    // means every client has finished sending its previous frame.
+    return ws.availableForWriteAll();
 }
 
 void WebModule::wsSendBuf(const void* pBuf, size_t len) {
-    for (AsyncWebSocketClient& client : ws.getClients()) {
-        if (client.status() == WS_CONNECTED && client.canSend()) {
-            client.binary(static_cast<const uint8_t*>(pBuf), len);
-        }
-    }
+    // One copy shared by every client, freed after the last one has sent it
+    ws.binaryAll(static_cast<const uint8_t*>(pBuf), len);
 }

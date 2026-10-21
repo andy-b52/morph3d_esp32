@@ -1,26 +1,26 @@
 #include "RleEncoder.h"
-#include "FrameBuffer.h"
 
-void encodeFrame(std::vector<uint16_t>& v) {
-    v.clear();
-    if (FRAME_BYTES == 0) return;
+void encodeFrame(const uint8_t* frame, size_t size, std::vector<uint8_t>& out) {
+    out.clear();
 
-    uint8_t lastColor = frameBuf[0];
-    uint8_t packetSize = 1;
+    if (size == 0) return;
 
-    for (size_t offset = 1; offset < FRAME_BYTES; offset++) {
-        uint8_t currentColor = frameBuf[offset];
+    uint8_t color = frame[0];
+    uint8_t runLength = 1;
 
+    for (size_t i = 1; i < size; i++) {
         // If color changes OR we hit the 8-bit packet limit, flush the packet
-        if (currentColor != lastColor || packetSize == 255) {
-            v.push_back(static_cast<uint16_t>(lastColor | (packetSize << 8)));
-            lastColor = currentColor;
-            packetSize = 1;
+        if (frame[i] != color || runLength == 255) {
+            out.push_back(color);
+            out.push_back(runLength);
+            color = frame[i];
+            runLength = 1;
         } else {
-            packetSize++;
+            runLength++;
         }
     }
 
     // Always cleanly flush exactly one final packet at the very end
-    v.push_back(static_cast<uint16_t>(lastColor | (packetSize << 8)));
+    out.push_back(color);
+    out.push_back(runLength);
 }

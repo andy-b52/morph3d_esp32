@@ -11,9 +11,11 @@
 const int TARGET_FPS = 60;  // frames per second
 const int FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
 
+const size_t ENCODED_FRAME_RESERVE = 12 * 1024;
+
 unsigned long lastFrameSentTime = 0;
 uint32_t frameNumber = 0;
-std::vector<uint16_t> encodedFrame;
+std::vector<uint8_t> encodedFrame;
 unsigned long lastSerialPrintTime = 0;
 
 // void drawRandomPixel() {
@@ -95,6 +97,8 @@ void setup() {
     WebModule::begin();
 
     createModels();
+
+    encodedFrame.reserve(ENCODED_FRAME_RESERVE);
 }
 
 void loop() {
@@ -135,13 +139,12 @@ void loop() {
 
     lastFrameSentTime = now;
 
-    encodeFrame(encodedFrame);
+    encodeFrame(frameBuf, FRAME_BYTES, encodedFrame);
 
     nextFrameDrawn = false;
 
     // WebModule::wsSendBuf(frameBuf, FRAME_BYTES);
-    WebModule::wsSendBuf(encodedFrame.data(),
-                         encodedFrame.size() * sizeof(uint16_t));
+    WebModule::wsSendBuf(encodedFrame.data(), encodedFrame.size());
 
     if (now - lastSerialPrintTime > 1000) {
         lastSerialPrintTime = now;
