@@ -8,33 +8,24 @@
 #include "WiFiModule.h"
 #include "esp_system.h"
 
+namespace {
 const int TARGET_FPS = 60;  // frames per second
 const int FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
 
 const size_t ENCODED_FRAME_RESERVE = 12 * 1024;
 
+unsigned long lastSerialPrintTime = 0;
+
 unsigned long lastFrameSentTime = 0;
 uint32_t frameNumber = 0;
 std::vector<uint8_t> encodedFrame;
-unsigned long lastSerialPrintTime = 0;
 
-// void drawRandomPixel() {
-//     uint8_t c = static_cast<uint8_t>(rand() % 256);
-
-//     int x = rand() % WIDTH;
-//     int y = rand() % HEIGHT;
-
-//     setPixel(x, y, c);
-// }
-
-namespace {
 Morpher morpher;
 
 void drawFrame(uint32_t frameNr) {
     fadeOutFrame();
     renderModel(morpher.step(), frameNr);
 }
-}  // namespace
 
 void printInfo() {
     Serial.println("Frame #" + String(frameNumber) + " sent");
@@ -82,6 +73,7 @@ const char* getResetReason(esp_reset_reason_t reason) {
             return "Other / unrecognized reset";
     }
 }
+}  // namespace
 
 void setup() {
     Serial.begin(115200);
@@ -112,7 +104,6 @@ void loop() {
     static bool nextFrameDrawn = false;
 
     if (!nextFrameDrawn) {
-        // drawRandomPixel();
         drawFrame(frameNumber);
 
         nextFrameDrawn = true;
@@ -126,7 +117,6 @@ void loop() {
     }
 
     if (!WebModule::wsAvailableForWrite()) {
-        // Serial.println("WebSocket is not available for write!");
         delay(1);  // a client's send queue is still draining
         return;
     }
@@ -143,7 +133,6 @@ void loop() {
 
     nextFrameDrawn = false;
 
-    // WebModule::wsSendBuf(frameBuf, FRAME_BYTES);
     WebModule::wsSendBuf(encodedFrame.data(), encodedFrame.size());
 
     if (now - lastSerialPrintTime > 1000) {

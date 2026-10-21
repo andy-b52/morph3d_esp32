@@ -176,7 +176,6 @@ void onWsEvent(AsyncWebSocket*, AsyncWebSocketClient* client, AwsEventType type,
     if (type == WS_EVT_CONNECT) {
         Serial.println("WebSocket client #" + String(client->id()) +
                        " connected from " + client->remoteIP().toString());
-        // client->text("Hello from ESP32 Server!");
     } else if (type == WS_EVT_DISCONNECT) {
         Serial.println("WebSocket client #" + String(client->id()) +
                        " disconnected");
