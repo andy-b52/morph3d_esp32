@@ -28,9 +28,9 @@ unsigned long lastSerialPrintTime = 0;
 namespace {
 Morpher morpher;
 
-void drawFrame(uint32_t frameNumber) {
+void drawFrame(uint32_t frameNr) {
     fadeOutFrame();
-    renderModel(morpher.step(), frameNumber);
+    renderModel(morpher.step(), frameNr);
 }
 }  // namespace
 

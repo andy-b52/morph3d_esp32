@@ -79,11 +79,11 @@ void drawModel(Model& m) {
         if (px >= 0 && px < WIDTH && py >= 0 && py < HEIGHT) {
 
             // Ranges from 0 (farthest) to zRange (closest)
-            int32_t relativeZ = pt.z - minZ;
+            float relativeZ = pt.z - minZ;
 
             // Map linearly to a 64-255 brightness scale
             uint8_t brightness =
-                static_cast<uint8_t>(((relativeZ * 191) / zRange) + 64);
+                static_cast<uint8_t>(((relativeZ * 191.0f) / zRange) + 64.0f);
 
             setPixel2x2(px, py, brightness);
             // setPixel(px, py, brightness);

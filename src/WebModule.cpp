@@ -167,8 +167,8 @@ const char index_html[] PROGMEM = R"html(
 </html>
 )html";
 
-void onWsEvent(AsyncWebSocket* server, AsyncWebSocketClient* client,
-               AwsEventType type, void* arg, uint8_t* data, size_t len) {
+void onWsEvent(AsyncWebSocket*, AsyncWebSocketClient* client, AwsEventType type,
+               void* arg, uint8_t* data, size_t len) {
     if (type == WS_EVT_CONNECT) {
         Serial.println("WebSocket client #" + String(client->id()) +
                        " connected from " + client->remoteIP().toString());
