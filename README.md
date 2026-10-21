@@ -2,12 +2,12 @@
 
 An ESP32 renders a rotating 3D point cloud that smoothly morphs between shapes, and streams it live to your browser over WebSocket. No display hardware needed: connect to the ESP32's Wi-Fi, open a web page, and watch.
 
-<!-- TODO: add a demo GIF, e.g. ![Demo](docs/demo.gif) -->
+![A rotating point cloud morphing from a Lissajous curve into a torus, then into a sphere](docs/demo.gif)
 
 ## Features
 
 - **Software 3D renderer on the ESP32:** rotation around three axes, perspective projection, and depth shading. Nearer points are brighter.
-- **Shape morphing:** a sphere, a 3D Lissajous curve and a torus, each made of 256 points. The current shape rotates for about 4 seconds, then morphs into a random other shape.
+- **Shape morphing:** seven shapes (a sphere, a torus, a double cone and four 3D Lissajous curves), each made of 256 points. The current shape rotates for about 4 seconds, then morphs into a random other shape.
 - **Motion trails:** every frame fades the previous one instead of clearing it.
 - **Live streaming at up to 60 FPS** to any number of browsers, using a binary WebSocket and simple run-length encoding to keep frames small.
 - **No app to install:** the viewer page is served by the ESP32 itself.
@@ -99,11 +99,11 @@ flowchart LR
     E -- WebSocket --> F
 ```
 
-1. **Models** ([`Models.cpp`](src/Models.cpp)): each shape is generated at startup as 256 points with fixed-point coordinates (scaled by 4096).
-2. **Morphing** ([`DrawUtils.cpp`](src/DrawUtils.cpp)): point *i* of the source shape moves linearly towards point *i* of the target shape over 64 frames (`MORPH_STEP_CNT`), after the current shape has been held for 256 frames (`NO_MORPH_STEP_CNT`).
-3. **Rotation and projection:** points rotate around the Z, Y and X axes at different speeds, then are projected with perspective.
-4. **Drawing:** points are sorted back to front and drawn as 2×2 pixels. Brightness, from 64 to 255, depends on depth.
-5. **Encoding:** the 76,800-byte frame is run-length encoded as `[colour, run length]` byte pairs. Mostly-black frames shrink to a few kilobytes.
+1. **Models** ([`Models.cpp`](src/Models.cpp)): each shape is generated at startup as 256 points with `float` coordinates.
+2. **Morphing** ([`Morpher.cpp`](src/Morpher.cpp)): point *i* of the source shape moves linearly towards point *i* of the target shape over 64 frames (`MORPH_FRAMES`), after the current shape has been held for 256 frames (`HOLD_FRAMES`).
+3. **Rotation and projection** ([`Renderer.cpp`](src/Renderer.cpp)): points rotate around the Z, Y and X axes at different speeds, then are projected with perspective.
+4. **Drawing:** points are sorted back to front and drawn as 2×2 pixels into the frame buffer ([`FrameBuffer.cpp`](src/FrameBuffer.cpp)). Brightness, from 64 to 255, depends on depth.
+5. **Encoding** ([`RleEncoder.cpp`](src/RleEncoder.cpp)): the 76,800-byte frame is run-length encoded as `[colour, run length]` byte pairs. Mostly-black frames shrink to a few kilobytes.
 6. **Streaming** ([`WebModule.cpp`](src/WebModule.cpp)): frames are sent over a binary WebSocket at `/ws`. A frame is skipped while a client still has unsent data queued, so slow clients don't exhaust the ESP32's memory.
 7. **Viewer:** the embedded web page decodes the runs into an RGBA canvas.
 
@@ -113,7 +113,10 @@ flowchart LR
 src/
 ├── main.cpp             Setup, frame loop and timing, heap diagnostics
 ├── Models.cpp/.h        Generates the 3D point models
-├── DrawUtils.cpp/.h     Morphing, rotation, projection, rasterising, RLE encoding
+├── Morpher.cpp/.h       Hold/morph timing and shape interpolation
+├── Renderer.cpp/.h      Rotation, projection and drawing points
+├── FrameBuffer.cpp/.h   Frame buffer, pixel drawing and fade-out
+├── RleEncoder.cpp/.h    Run-length encoding of frames
 ├── WebModule.cpp/.h     HTTP server, WebSocket, embedded viewer page
 ├── WiFiModule.cpp/.h    Access point / station setup
 ├── secrets.example.h    Credentials template (copy to secrets.h)
@@ -126,10 +129,10 @@ platformio.ini           Board, framework and library configuration
 | What | Where |
 |---|---|
 | Target frame rate | `TARGET_FPS` in [`main.cpp`](src/main.cpp) |
-| Resolution | `WIDTH` / `HEIGHT` in [`DrawUtils.h`](src/DrawUtils.h), and the matching constants in the page in `WebModule.cpp` |
-| Trail length | Fade amount in `fadeOutFrame()` in `DrawUtils.cpp` |
-| Hold and morph duration | `NO_MORPH_STEP_CNT` (frames a shape is held) and `MORPH_STEP_CNT` (frames a morph takes) in [`DrawUtils.h`](src/DrawUtils.h) |
-| New shapes | Add a generator in `createModels()` and increase `MODEL_COUNT` in [`Models.h`](src/Models.h). Every model must have exactly `POINTS_PER_MODEL` points. |
+| Resolution | `WIDTH` / `HEIGHT` in [`FrameBuffer.h`](src/FrameBuffer.h), and the matching constants in the page in `WebModule.cpp` |
+| Trail length | Fade amount in `fadeOutFrame()` in [`FrameBuffer.cpp`](src/FrameBuffer.cpp) |
+| Hold and morph duration | `HOLD_FRAMES` (frames a shape is held) and `MORPH_FRAMES` (frames a morph takes) in [`Morpher.h`](src/Morpher.h) |
+| New shapes | Add a generator in `createModels()` in [`Models.cpp`](src/Models.cpp). Every model must have exactly `POINTS_PER_MODEL` points. |
 
 ## Built with
 
