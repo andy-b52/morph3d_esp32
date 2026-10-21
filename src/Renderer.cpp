@@ -7,7 +7,6 @@ namespace {
 Model rotated;  // scratch: rotated + projected points
 
 void makePerspective(float x, float y, float z, float& newX, float& newY) {
-
     const float d = 200.0f;
     const float cameraOffset = 100.0f;
 
@@ -18,12 +17,12 @@ void makePerspective(float x, float y, float z, float& newX, float& newY) {
 }
 
 void rotateModel(uint32_t frameNumber, const Model& m, Model& rotatedModel) {
-    if (!rotatedModel.empty()) {
-        rotatedModel.clear();
-    }
+    rotatedModel.resize(m.size());
 
-    // calculate angels
-    float a1 = (2.0f * (float)M_PI * (float)frameNumber) / 512.0f;
+    // calculate angles
+    float a1 =
+        (2.0f * static_cast<float>(M_PI) * static_cast<float>(frameNumber)) /
+        512.0f;
     float a2 = 2.0f * a1;
     float a3 = 3.0f * a1;
 
@@ -34,7 +33,9 @@ void rotateModel(uint32_t frameNumber, const Model& m, Model& rotatedModel) {
 
     float newX, newY;
 
-    for (const Point3D& pt : m) {
+    for (size_t i = 0; i < m.size(); i++) {
+        const Point3D& pt = m[i];
+
         float x0 = pt.x;
         float y0 = pt.y;
         float z0 = pt.z;
@@ -56,8 +57,7 @@ void rotateModel(uint32_t frameNumber, const Model& m, Model& rotatedModel) {
 
         makePerspective(x3, y3, z3, newX, newY);
 
-        rotatedModel.emplace_back(
-            Point3D{newX, newY, z3});
+        rotatedModel[i] = Point3D{newX, newY, z3};
     }
 }
 
@@ -86,7 +86,6 @@ void drawModel(Model& m) {
                 static_cast<uint8_t>(((relativeZ * 191.0f) / zRange) + 64.0f);
 
             setPixel2x2(px, py, brightness);
-            // setPixel(px, py, brightness);
         }
     }
 }
