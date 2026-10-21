@@ -1,8 +1,6 @@
 #include "Models.h"
 #include <cmath>
 
-Models models;
-
 namespace {
 
 struct Vec3 {
@@ -10,7 +8,7 @@ struct Vec3 {
 };
 
 template <typename Generator>
-void addModel(Generator gen) {
+void addModel(Models& models, Generator gen) {
     Model& model = models.emplace_back();
     model.reserve(POINTS_PER_MODEL);
 
@@ -26,11 +24,11 @@ void addModel(Generator gen) {
 }
 }  // namespace
 
-void createModels() {
-    models.reserve(MODEL_COUNT);
+Models createModels() {
+    Models models;
 
     // Sphere: spiral from pole to pole, 10 turns
-    addModel([](double t) {
+    addModel(models, [](double t) {
         double r = 100.0 * std::sin(t / 2);
 
         return Vec3{r * std::sin(10 * t), r * std::cos(10 * t),
@@ -38,13 +36,13 @@ void createModels() {
     });
 
     // 3D Lissajous curve
-    addModel([](double t) {
+    addModel(models, [](double t) {
         return Vec3{100.0 * std::sin(2 * t), 100.0 * std::cos(t),
                     100.0 * std::sin(3 * t)};
     });
 
     // Torus: 26 turns around the tube per turn around the ring
-    addModel([](double t) {
+    addModel(models, [](double t) {
         const double R = 75.0;  // ring radius
         const double r = 30.0;  // tube radius
         double theta = 26 * t;
@@ -52,4 +50,11 @@ void createModels() {
                     (R + r * std::cos(theta)) * std::sin(t),
                     r * std::sin(theta)};
     });
+
+    return models;
+}
+
+const Models& getModels() {
+    static const Models models = createModels();
+    return models;
 }

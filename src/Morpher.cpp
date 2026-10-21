@@ -1,8 +1,6 @@
 #include "Morpher.h"
-#include <cmath>
+#include <cassert>
 #include "esp_random.h"
-
-static_assert(MODEL_COUNT >= 2, "Morphing needs at least two models");
 
 namespace {
 
@@ -11,25 +9,24 @@ void morph(const Model& src, const Model& dst, float t, Model& res) {
     res.resize(src.size());
 
     for (size_t i = 0; i < src.size(); i++) {
-        float srcX = static_cast<float>(src[i].x);
-        float srcY = static_cast<float>(src[i].y);
-        float srcZ = static_cast<float>(src[i].z);
+        float srcX = src[i].x;
+        float srcY = src[i].y;
+        float srcZ = src[i].z;
 
-        float dstX = static_cast<float>(dst[i].x);
-        float dstY = static_cast<float>(dst[i].y);
-        float dstZ = static_cast<float>(dst[i].z);
+        float dstX = dst[i].x;
+        float dstY = dst[i].y;
+        float dstZ = dst[i].z;
 
-        res[i] = Point3D{srcX + t * (dstX - srcX),
-                         srcY + t * (dstY - srcY),
+        res[i] = Point3D{srcX + t * (dstX - srcX), srcY + t * (dstY - srcY),
                          srcZ + t * (dstZ - srcZ)};
     }
 }
 
-int randomModel() { return static_cast<int>(esp_random() % MODEL_COUNT); }
+int randomModel() { return static_cast<int>(esp_random() % getModels().size()); }
 
 // A random model index other than `current`.
-// Terminates because MODEL_COUNT >= 2 (see static_assert above).
 int randomOtherModel(int current) {
+    assert(getModels().size() >= 2 && "Morphing needs at least two models");
     int next;
     do {
         next = randomModel();
@@ -39,6 +36,8 @@ int randomOtherModel(int current) {
 }  // namespace
 
 const Model& Morpher::step() {
+    const Models& models = getModels();
+
     if (srcIdx_ < 0) {
         srcIdx_ = randomModel();
     }

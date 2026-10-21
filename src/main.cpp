@@ -96,7 +96,7 @@ void setup() {
 
     WebModule::begin();
 
-    createModels();
+    getModels();
 
     encodedFrame.reserve(ENCODED_FRAME_RESERVE);
 }
