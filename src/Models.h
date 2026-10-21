@@ -7,7 +7,7 @@ const int POINTS_PER_MODEL = 256;
 const uint8_t MODEL_COUNT = 3;
 
 struct Point3D {
-    int32_t x, y, z; // fixed point (multiplied by 4096) coordinates
+    float x, y, z;
 };
 
 using Model = std::vector<Point3D>;

@@ -1,6 +1,9 @@
 #include <Arduino.h>
-#include "DrawUtils.h"
+#include "FrameBuffer.h"
 #include "Models.h"
+#include "Morpher.h"
+#include "Renderer.h"
+#include "RleEncoder.h"
 #include "WebModule.h"
 #include "WiFiModule.h"
 #include "esp_system.h"
@@ -13,14 +16,23 @@ uint32_t frameNumber = 0;
 std::vector<uint16_t> encodedFrame;
 unsigned long lastSerialPrintTime = 0;
 
-void drawRandomPixel() {
-    uint8_t c = static_cast<uint8_t>(rand() % 256);
+// void drawRandomPixel() {
+//     uint8_t c = static_cast<uint8_t>(rand() % 256);
 
-    int x = rand() % WIDTH;
-    int y = rand() % HEIGHT;
+//     int x = rand() % WIDTH;
+//     int y = rand() % HEIGHT;
 
-    setPixel(x, y, c);
+//     setPixel(x, y, c);
+// }
+
+namespace {
+Morpher morpher;
+
+void drawFrame(uint32_t frameNumber) {
+    fadeOutFrame();
+    renderModel(morpher.step(), frameNumber);
 }
+}  // namespace
 
 void printInfo() {
     Serial.println("Frame #" + String(frameNumber) + " sent");

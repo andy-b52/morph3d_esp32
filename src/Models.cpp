@@ -4,15 +4,10 @@
 Models models;
 
 namespace {
-constexpr double FIXED_SCALE = 4096.0;
 
 struct Vec3 {
     double x, y, z;
 };
-
-int32_t toFixed(double v) {
-    return static_cast<int32_t>(std::lround(v * FIXED_SCALE));
-}
 
 template <typename Generator>
 void addModel(Generator gen) {
@@ -24,7 +19,9 @@ void addModel(Generator gen) {
     for (int i = 0; i < POINTS_PER_MODEL; i++) {
         double t = 2.0 * M_PI * i / totalPoints;
         Vec3 p = gen(t);
-        model.emplace_back(Point3D{toFixed(p.x), toFixed(p.y), toFixed(p.z)});
+        model.emplace_back(Point3D{static_cast<float>(p.x),
+                                   static_cast<float>(p.y),
+                                   static_cast<float>(p.z)});
     }
 }
 }  // namespace

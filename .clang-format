@@ -1,0 +1,6 @@
+BasedOnStyle: Google
+IndentWidth: 4
+AccessModifierOffset: -4  # public:/private: flush with "class"
+IncludeBlocks: Merge
+IndentGotoLabels: true
+KeepEmptyLinesAtTheStartOfBlocks: true
