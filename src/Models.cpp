@@ -51,6 +51,32 @@ Models createModels() {
                     r * std::sin(theta)};
     });
 
+    // 3D Lissajous curve: frequencies 2, 1, 3 with cosine on z
+    addModel(models, [](double t) {
+        return Vec3{100.0 * std::sin(2 * t), 100.0 * std::cos(t),
+                    100.0 * std::cos(3 * t)};
+    });
+
+    // 3D Lissajous curve: frequencies 2, 5, 3
+    addModel(models, [](double t) {
+        return Vec3{100.0 * std::sin(2 * t), 100.0 * std::cos(5 * t),
+                    100.0 * std::sin(3 * t)};
+    });
+
+    // 3D Lissajous curve: frequencies 2, 5, 3 with cosine on z
+    addModel(models, [](double t) {
+        return Vec3{100.0 * std::sin(2 * t), 100.0 * std::cos(5 * t),
+                    100.0 * std::cos(3 * t)};
+    });
+
+    // Double cone: spiral from tip to tip through the apex, 10 turns
+    addModel(models, [](double t) {
+        double r = 100.0 * std::cos(t / 2);
+
+        return Vec3{r * std::sin(10 * t), r * std::cos(10 * t),
+                    100.0 * std::cos(t / 2)};
+    });
+
     return models;
 }
 
