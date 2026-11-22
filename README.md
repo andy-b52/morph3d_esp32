@@ -7,9 +7,9 @@ An ESP32 renders a rotating 3D point cloud that smoothly morphs between shapes, 
 ## Features
 
 - **Software 3D renderer on the ESP32:** rotation around three axes, perspective projection, and depth shading. Nearer points are brighter.
-- **Shape morphing:** seven shapes (a sphere, a torus, a double cone and four 3D Lissajous curves), each made of 256 points. The current shape rotates for about 4 seconds, then morphs into a random other shape.
+- **Shape morphing:** seven shapes (a sphere, a torus, a double cone and four 3D Lissajous curves), each made of 256 points. The current shape rotates for about 6 seconds, then morphs into a random other shape.
 - **Motion trails:** every frame fades the previous one instead of clearing it.
-- **Live streaming at up to 60 FPS** to any number of browsers, using a binary WebSocket and simple run-length encoding to keep frames small.
+- **Live streaming at up to 40 FPS** (measured) to any number of browsers, using a binary WebSocket and simple run-length encoding to keep frames small.
 - **No app to install:** the viewer page is served by the ESP32 itself.
 - **Own Wi-Fi access point:** the ESP32 creates its own network, so no router is needed.
 
