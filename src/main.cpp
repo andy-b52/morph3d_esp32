@@ -78,6 +78,16 @@ const char* getResetReason(esp_reset_reason_t reason) {
 void setup() {
     Serial.begin(115200);
 
+    // Allocate first, while the heap still has its largest contiguous block
+    if (!allocFrameBuffer()) {
+        while (true) {
+            Serial.println("Not enough memory for a " + String(WIDTH) + "x" +
+                           String(HEIGHT) + " frame buffer (" +
+                           String(FRAME_BYTES) + " bytes)");
+            delay(2000);
+        }
+    }
+
     delay(500);
 
     esp_reset_reason_t reason = esp_reset_reason();

@@ -1,8 +1,13 @@
 #include <algorithm>
-#include <iterator>
+#include <cstdlib>
 #include "FrameBuffer.h"
 
-uint8_t frameBuf[PIXELS];
+uint8_t* frameBuf = nullptr;
+
+bool allocFrameBuffer() {
+    frameBuf = static_cast<uint8_t*>(calloc(PIXELS, sizeof(uint8_t)));
+    return frameBuf != nullptr;
+}
 
 void setPixel(int x, int y, uint8_t c) {
     if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
@@ -44,7 +49,7 @@ void setPixel2x2(int x, int y, uint8_t c) {
     }
 }
 
-void clearFrame() { std::fill(std::begin(frameBuf), std::end(frameBuf), 0); }
+void clearFrame() { std::fill(frameBuf, frameBuf + PIXELS, 0); }
 
 void fadeOutFrame() {
     for (uint32_t i = 0; i < FRAME_BYTES; i++) {

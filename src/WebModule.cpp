@@ -1,5 +1,6 @@
 #include "WebModule.h"
 #include <ESPAsyncWebServer.h>
+#include "FrameBuffer.h"
 
 static_assert(WS_MAX_QUEUED_MESSAGES == 1,
               "wsAvailableForWrite() relies on a one-message queue; "
@@ -9,6 +10,8 @@ namespace {
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
+// Served through templateProcessor(): %NAME% is a placeholder, so a literal
+// percent sign must be written as %%.
 const char index_html[] PROGMEM = R"html(
 <!DOCTYPE html>
 <html>
@@ -23,10 +26,10 @@ const char index_html[] PROGMEM = R"html(
             margin-top: 50px;
         }
         canvas {
-            width: 100%;
+            width: 100%%;
             max-width: 640px;
             height: auto;
-            aspect-ratio: 4 / 3;
+            aspect-ratio: %WIDTH% / %HEIGHT%;
             image-rendering: pixelated;
             border: 1px solid #777;
             display: inline-block;
@@ -54,14 +57,14 @@ const char index_html[] PROGMEM = R"html(
 
     <p class="status">Connection: <span id="ws-status" style="color: red;">Disconnected</span></p>
     
-    <canvas id="screen" width="320" height="240"></canvas>
+    <canvas id="screen" width="%WIDTH%" height="%HEIGHT%"></canvas>
     
     <p id="stats" class="stats">FPS: 0</p>
 </div>
 
 <script>
-    const WIDTH = 320;
-    const HEIGHT = 240;
+    const WIDTH = %WIDTH%;
+    const HEIGHT = %HEIGHT%;
     const BYTES_PER_PIXEL = 1;
     const FRAME_BYTES = WIDTH * HEIGHT * BYTES_PER_PIXEL;
 
@@ -118,7 +121,7 @@ const char index_html[] PROGMEM = R"html(
                 return;
             }
 
-            if (event.data.byteLength % 2 !== 0) {
+            if (event.data.byteLength %% 2 !== 0) {
                 console.warn(
                     `Invalid frame size: ${event.data.byteLength}; ` +
                     `expected even number of bytes`
@@ -171,6 +174,12 @@ const char index_html[] PROGMEM = R"html(
 </html>
 )html";
 
+String templateProcessor(const String& var) {
+    if (var == "WIDTH") return String(WIDTH);
+    if (var == "HEIGHT") return String(HEIGHT);
+    return String();
+}
+
 void onWsEvent(AsyncWebSocket*, AsyncWebSocketClient* client, AwsEventType type,
                void* arg, uint8_t* data, size_t len) {
     if (type == WS_EVT_CONNECT) {
@@ -196,7 +205,7 @@ void WebModule::begin() {
     server.addHandler(&ws);
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
-        request->send(200, "text/html", index_html);
+        request->send(200, "text/html", index_html, templateProcessor);
     });
 
     server.begin();
