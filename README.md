@@ -11,7 +11,7 @@ An ESP32 renders a rotating 3D point cloud that smoothly morphs between shapes, 
 - **Motion trails:** every frame fades the previous one instead of clearing it.
 - **Live streaming at up to 60 FPS** to any number of browsers, using a binary WebSocket and simple run-length encoding to keep frames small.
 - **No app to install:** the viewer page is served by the ESP32 itself.
-- **Two Wi-Fi modes:** the ESP32 can create its own access point, join your existing network, or both.
+- **Own Wi-Fi access point:** the ESP32 creates its own network, so no router is needed.
 
 ## Hardware
 
@@ -37,7 +37,7 @@ cd morph3d_esp32
 
 ### 3. Configure Wi-Fi credentials
 
-Credentials are kept out of git. Create your own copy of the template:
+Credentials for the ESP32's access point are kept out of git. Create your own copy of the template:
 
 ```bash
 cp src/secrets.example.h src/secrets.h
@@ -46,27 +46,13 @@ cp src/secrets.example.h src/secrets.h
 Then edit `src/secrets.h`:
 
 ```cpp
-static const char WIFI_NETWORK_SSID[] = "your_wifi_ssid";      // network to join
-static const char WIFI_NETWORK_PASS[] = "your_wifi_password";
-
 static const char SOFT_AP_SSID[] = "morph3d";                  // network the ESP32 creates
 static const char SOFT_AP_PASS[] = "at_least_8_chars";
 ```
 
 The access point password must be at least 8 characters, or the ESP32 won't start the access point.
 
-### 4. Choose the Wi-Fi mode
-
-In [`platformio.ini`](platformio.ini), enable one or both modes in `build_flags`:
-
-```ini
-build_flags =
-    -std=gnu++17
-    -D USE_SOFT_AP          ; ESP32 creates its own network (default)
-    ; -D USE_WIFI_NETWORK   ; ESP32 joins your existing network
-```
-
-### 5. Build and upload
+### 4. Build and upload
 
 In VS Code, click **Upload** in the PlatformIO toolbar, or run:
 
@@ -77,12 +63,9 @@ pio device monitor
 
 The serial monitor runs at 115200 baud and prints the IP address to open.
 
-### 6. Watch
+### 5. Watch
 
-| Mode | Connect to | Open in browser |
-|---|---|---|
-| Soft AP | Wi-Fi network `morph3d` | `http://192.168.4.1` |
-| Existing network | Your usual Wi-Fi | The IP printed on the serial monitor |
+Connect to the Wi-Fi network `morph3d` (or whatever `SOFT_AP_SSID` you chose) and open `http://192.168.4.1`.
 
 The page shows the connection status and the received frame rate, and reconnects automatically if the connection drops. Rendering only runs while at least one browser is connected.
 
@@ -118,7 +101,7 @@ src/
 ├── FrameBuffer.cpp/.h   Frame buffer, pixel drawing and fade-out
 ├── RleEncoder.cpp/.h    Run-length encoding of frames
 ├── WebModule.cpp/.h     HTTP server, WebSocket, embedded viewer page
-├── WiFiModule.cpp/.h    Access point / station setup
+├── WiFiModule.cpp/.h    Access point setup
 ├── secrets.example.h    Credentials template (copy to secrets.h)
 └── secrets.h            Your credentials (git-ignored)
 platformio.ini           Board, framework and library configuration
